@@ -25,7 +25,7 @@ class MessageQueue {
 
  private:
   std::mutex _mutex;
-  std::condition_variable _cond;
+  std::condition_variable _condition;
   std::deque<T> _queue;
 };
 
