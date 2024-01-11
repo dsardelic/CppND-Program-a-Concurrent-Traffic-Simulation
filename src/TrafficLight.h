@@ -2,8 +2,8 @@
 #define TRAFFICLIGHT_H
 
 #include <condition_variable>  // std::condition_variable
-#include <deque>
-#include <mutex>  // std::mutex
+#include <deque>               // std::deque
+#include <mutex>               // std::mutex
 
 #include "TrafficObject.h"
 
@@ -17,10 +17,16 @@ enum class TrafficLightPhase { red, green };
 // Also, the class should define an std::dequeue called _queue, which stores objects of type TrafficLightPhase.
 // Also, there should be an std::condition_variable as well as an std::mutex as private members.
 
-template <class T>
+template <typename T>
 class MessageQueue {
  public:
+  T receive();
+  void send(T&&);
+
  private:
+  std::mutex _mutex;
+  std::condition_variable _cond;
+  std::deque<T> _queue;
 };
 
 // FP.1 : Define a class „TrafficLight“ which is a child class of TrafficObject.
