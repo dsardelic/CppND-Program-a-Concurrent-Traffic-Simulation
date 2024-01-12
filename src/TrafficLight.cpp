@@ -1,6 +1,8 @@
 #include "TrafficLight.h"
 
+#include <chrono>  // std::chrono::system_clock
 #include <future>  // std::async, std::launch::async
+#include <iostream>
 #include <memory>  // std::make_shared
 #include <mutex>   // std::lock_guard, std::mutex, std::unique_lock
 #include <random>  // std::random_device, std::mt19937, std::uniform_int_distribution
@@ -67,13 +69,18 @@ void TrafficLight::cycleThroughPhases() {
 
   std::random_device rd;
   std::mt19937 eng(rd());
-  std::uniform_int_distribution<int> distr(4, 6);
-  int cycle_duration{distr(eng)};
-  auto start = std::chrono::system_clock::now();
+  std::uniform_real_distribution<double> distr(4, 6);
+  double cycle_duration{distr(eng)};
+  auto start = std::chrono::steady_clock::now();
   while (true) {
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
-    auto elapsed = std::chrono::system_clock::now() - start;
-    if (elapsed.count() >= cycle_duration) {
+    auto stop = std::chrono::steady_clock::now();
+    auto duration =
+        (std::chrono::duration_cast<std::chrono::milliseconds>(stop - start)
+             .count()) /
+        1000.0;
+    if (duration >= cycle_duration) {
+      std::cout << "Elapsed = " << duration << std::endl;
       auto next_phase{
           _currentPhase == TrafficLightPhase::red ? TrafficLightPhase::green
                                                   : TrafficLightPhase::red
@@ -85,7 +92,7 @@ void TrafficLight::cycleThroughPhases() {
       );
       future.wait();
       cycle_duration = distr(eng);
-      start = std::chrono::system_clock::now();
+      start = std::chrono::steady_clock::now();
     }
   }
 }
