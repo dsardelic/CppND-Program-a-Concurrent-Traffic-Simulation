@@ -17,8 +17,8 @@ T MessageQueue<T>::receive() {
 
   std::unique_lock<std::mutex> uLock(_mutex);
   _condition.wait(uLock, [this] { return !_queue.empty(); });
-  T msg = std::move(_queue.back());
-  _queue.pop_back();
+  auto msg = std::move(_queue.back());
+  _queue.clear();
   return msg;
 }
 
