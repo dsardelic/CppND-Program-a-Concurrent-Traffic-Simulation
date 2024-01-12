@@ -5,10 +5,9 @@
 #include <iostream>  // std::cout
 #include <memory>    // std::shared_ptr
 #include <mutex>     // std::unique_lock, std::lock_guard
-#include <random>
-#include <thread>   // std::thread
-#include <utility>  // std::move
-#include <vector>   // std::vector
+#include <thread>    // std::thread
+#include <utility>   // std::move
+#include <vector>    // std::vector
 
 #include "Street.h"   // Street
 #include "Vehicle.h"  // Vehicle
@@ -144,8 +143,5 @@ void Intersection::processVehicleQueue() {
 
 bool Intersection::trafficLightIsGreen() {
   // please include this part once you have solved the final project tasks
-  if (_trafficLight.getCurrentPhase() == TrafficLightPhase::green)
-    return true;
-  else
-    return false;
+  return _trafficLight.getCurrentPhase() == TrafficLightPhase::green;
 }

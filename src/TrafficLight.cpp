@@ -65,11 +65,11 @@ void TrafficLight::cycleThroughPhases() {
   // to the message queue using move semantics. The cycle duration should be a random value between 4 and 6 seconds.
   // Also, the while-loop should use std::this_thread::sleep_for to wait 1ms between two cycles.
 
-  auto start = std::chrono::system_clock::now();
   std::random_device rd;
   std::mt19937 eng(rd());
   std::uniform_int_distribution<int> distr(4, 6);
   int cycle_duration{distr(eng)};
+  auto start = std::chrono::system_clock::now();
   while (true) {
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
     auto elapsed = std::chrono::system_clock::now() - start;

@@ -6,7 +6,7 @@
 #include <memory>              // std::shared_ptr
 #include <mutex>               // std::mutex
 
-#include "TrafficObject.h"
+#include "TrafficObject.h"  // TrafficObject
 
 // forward declarations to avoid include cycle
 class Vehicle;
@@ -57,7 +57,6 @@ class TrafficLight : public TrafficObject {
   // FP.4b : create a private member of type MessageQueue for messages of type TrafficLightPhase
   // and use it within the infinite loop to push each new TrafficLightPhase into it by calling
   // send in conjunction with move semantics.
-
   std::shared_ptr<MessageQueue<TrafficLightPhase>> _messages;
 
   std::condition_variable _condition;
