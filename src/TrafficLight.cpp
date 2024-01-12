@@ -1,7 +1,10 @@
 #include "TrafficLight.h"
 
-#include <iostream>
-#include <random>
+#include <future>  // std::async, std::launch::async
+#include <memory>  // std::make_shared
+#include <mutex>   // std::lock_guard, std::mutex, std::unique_lock
+#include <random>  // std::random_device, std::mt19937, std::uniform_int_distribution
+#include <utility>  // std::move
 
 /* Implementation of class "MessageQueue" */
 
@@ -30,18 +33,29 @@ void MessageQueue<T>::send(T&& msg) {
 
 /* Implementation of class "TrafficLight" */
 
-TrafficLight::TrafficLight() { _currentPhase = TrafficLightPhase::red; }
+TrafficLight::TrafficLight() {
+  _currentPhase = TrafficLightPhase::red;
+  _messages = std::make_shared<MessageQueue<TrafficLightPhase>>();
+}
 
 void TrafficLight::waitForGreen() {
   // FP.5b : add the implementation of the method waitForGreen, in which an infinite while-loop
   // runs and repeatedly calls the receive function on the message queue.
   // Once it receives TrafficLightPhase::green, the method returns.
+
+  while (true) {
+    auto phase = _messages->receive();
+    if (phase == TrafficLightPhase::green) {
+      return;
+    }
+  }
 }
 
 TrafficLightPhase TrafficLight::getCurrentPhase() { return _currentPhase; }
 
 void TrafficLight::simulate() {
   // FP.2b : Finally, the private method „cycleThroughPhases“ should be started in a thread when the public method „simulate“ is called. To do this, use the thread queue in the base class.
+  threads.emplace_back(std::thread(&TrafficLight::cycleThroughPhases, this));
 }
 
 // virtual function which is executed in a thread
@@ -50,4 +64,28 @@ void TrafficLight::cycleThroughPhases() {
   // and toggles the current phase of the traffic light between red and green and sends an update method
   // to the message queue using move semantics. The cycle duration should be a random value between 4 and 6 seconds.
   // Also, the while-loop should use std::this_thread::sleep_for to wait 1ms between two cycles.
+
+  auto start = std::chrono::system_clock::now();
+  std::random_device rd;
+  std::mt19937 eng(rd());
+  std::uniform_int_distribution<int> distr(4, 6);
+  int cycle_duration{distr(eng)};
+  while (true) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    auto elapsed = std::chrono::system_clock::now() - start;
+    if (elapsed.count() >= cycle_duration) {
+      auto next_phase{
+          _currentPhase == TrafficLightPhase::red ? TrafficLightPhase::green
+                                                  : TrafficLightPhase::red
+      };
+      _currentPhase = next_phase;
+      auto future = std::async(
+          std::launch::async, &MessageQueue<TrafficLightPhase>::send, _messages,
+          std::move(next_phase)
+      );
+      future.wait();
+      cycle_duration = distr(eng);
+      start = std::chrono::system_clock::now();
+    }
+  }
 }
