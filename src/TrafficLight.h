@@ -42,11 +42,11 @@ class TrafficLight : public TrafficObject {
   TrafficLight();
 
   // getters / setters
+  TrafficLightPhase getCurrentPhase();
 
   // typical behaviour methods
   void waitForGreen();
   void simulate();
-  TrafficLightPhase getCurrentPhase();
 
  private:
   TrafficLightPhase _currentPhase;

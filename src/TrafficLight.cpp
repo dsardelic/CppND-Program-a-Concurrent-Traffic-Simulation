@@ -1,11 +1,10 @@
 #include "TrafficLight.h"
 
-#include <chrono>  // std::chrono::system_clock
+#include <chrono>  // std::chrono::steady_clock
 #include <future>  // std::async, std::launch::async
-#include <iostream>
 #include <memory>  // std::make_shared
 #include <mutex>   // std::lock_guard, std::mutex, std::unique_lock
-#include <random>  // std::random_device, std::mt19937, std::uniform_int_distribution
+#include <random>  // std::random_device, std::mt19937, std::uniform_real_distribution
 #include <utility>  // std::move
 
 /* Implementation of class "MessageQueue" */
@@ -46,8 +45,7 @@ void TrafficLight::waitForGreen() {
   // Once it receives TrafficLightPhase::green, the method returns.
 
   while (true) {
-    auto phase = _messages->receive();
-    if (phase == TrafficLightPhase::green) {
+    if (_messages->receive() == TrafficLightPhase::green) {
       return;
     }
   }
@@ -80,7 +78,6 @@ void TrafficLight::cycleThroughPhases() {
              .count()) /
         1000.0;
     if (duration >= cycle_duration) {
-      std::cout << "Elapsed = " << duration << std::endl;
       auto next_phase{
           _currentPhase == TrafficLightPhase::red ? TrafficLightPhase::green
                                                   : TrafficLightPhase::red
